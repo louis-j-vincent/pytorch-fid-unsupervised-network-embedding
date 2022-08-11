@@ -132,6 +132,7 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
         batch = batch.to(device)
 
         with torch.no_grad():
+            print(model(batch).keys())
             pred = model(batch)[0]
 
         # If model output is not scalar, apply global spatial average pooling.
