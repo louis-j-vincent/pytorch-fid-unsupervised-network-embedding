@@ -132,7 +132,6 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
         batch = batch.to(device)
 
         with torch.no_grad():
-            print(model(batch).keys())
             pred = model(batch)
             if 'my_pred' in pred.keys():
                pred = pred['my_pred']
