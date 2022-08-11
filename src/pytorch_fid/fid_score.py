@@ -41,6 +41,11 @@ import torchvision.transforms as TF
 from PIL import Image
 from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
+from torchvision.models.feature_extraction import create_feature_extractor
+
+SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
+
+
 
 try:
     from tqdm import tqdm
@@ -256,6 +261,44 @@ def calculate_fid_given_paths(paths, batch_size, device, dims, num_workers=1):
     m1, s1 = compute_statistics_of_path(paths[0], model, batch_size,
                                         dims, device, num_workers)
     m2, s2 = compute_statistics_of_path(paths[1], model, batch_size,
+                                        dims, device, num_workers)
+    fid_value = calculate_frechet_distance(m1, s1, m2, s2)
+
+    return fid_value
+   
+def compute_statistics(data, model, batch_size=50, dims=2048,
+                                    device='cpu', num_workers=1):
+    """Calculation of the statistics used by the FID.
+    Params:
+    -- files       : List of image files paths
+    -- model       : Instance of inception model
+    -- batch_size  : The images numpy array is split into batches with
+                     batch size batch_size. A reasonable batch size
+                     depends on the hardware.
+    -- dims        : Dimensionality of features returned by Inception
+    -- device      : Device to run calculations
+    -- num_workers : Number of parallel dataloader workers
+
+    Returns:
+    -- mu    : The mean over samples of the activations of the pool_3 layer of
+               the inception model.
+    -- sigma : The covariance matrix of the activations of the pool_3 layer of
+               the inception model.
+    """
+    act = get_activations(data, model, batch_size, dims, device, num_workers)
+    mu = np.mean(act, axis=0)
+    sigma = np.cov(act, rowvar=False)
+    return mu, sigma
+   
+def compute_fid(data1, data2, batch_size, device, dims, num_workers=1):
+    """Calculates the FID of two paths"""
+
+    model = create_feature_extractor(model, 
+                                     return_nodes = {'layer4.2.bn3':'myoutput'})
+
+    m1, s1 = compute_statistics(data1, model, batch_size,
+                                        dims, device, num_workers)
+    m2, s2 = compute_statistics(data2, model, batch_size,
                                         dims, device, num_workers)
     fid_value = calculate_frechet_distance(m1, s1, m2, s2)
 
