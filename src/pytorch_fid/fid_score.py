@@ -43,10 +43,6 @@ from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
 from torchvision.models.feature_extraction import create_feature_extractor
 
-SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
-
-
-
 try:
     from tqdm import tqdm
 except ImportError:
@@ -293,7 +289,8 @@ def compute_statistics(data, model, batch_size=50, dims=2048,
 def compute_fid(data1, data2, batch_size, device, dims, num_workers=1):
     """Calculates the FID of two paths"""
 
-    model = create_feature_extractor(model, 
+    SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
+    model = create_feature_extractor(SwAV, 
                                      return_nodes = {'layer4.2.bn3':'myoutput'})
 
     m1, s1 = compute_statistics(data1, model, batch_size,
