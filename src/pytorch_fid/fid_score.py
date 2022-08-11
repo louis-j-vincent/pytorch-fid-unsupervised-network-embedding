@@ -133,7 +133,11 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
 
         with torch.no_grad():
             print(model(batch).keys())
-            pred = model(batch)[0]
+            pred = model(batch)
+            if 'my_pred' in pred.keys():
+               pred = pred['my_pred']
+            else:
+               pred = pred[0]
 
         # If model output is not scalar, apply global spatial average pooling.
         # This happens if you choose a dimensionality not equal 2048.
@@ -293,7 +297,7 @@ def compute_fid(data1, data2, batch_size, device, dims, num_workers=1):
 
     SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
     model = create_feature_extractor(SwAV, 
-                                     return_nodes = {'layer4.2.bn3':0})
+                                     return_nodes = {'layer4.2.bn3':'my_pred'})
 
     m1, s1 = compute_statistics(data1, model, batch_size,
                                         dims, device, num_workers)
