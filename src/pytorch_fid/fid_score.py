@@ -291,9 +291,14 @@ def compute_statistics(data, model, batch_size=50, dims=2048,
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
    
-def compute_fid_SwAV(data1, data2, batch_size, device, dims, num_workers=1):
+def compute_fid_SwAV(data1, data2, batch_size=1024, dims=1024, num_workers=1):
     """Calculates the FID of two paths"""
 
+    device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
+
+    num_avail_cpus = len(os.sched_getaffinity(0))
+    num_workers = min(num_avail_cpus, 8)
+    
     SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
     model = create_feature_extractor(SwAV, 
                                      return_nodes = {'layer4.2.bn3':'my_pred'})
