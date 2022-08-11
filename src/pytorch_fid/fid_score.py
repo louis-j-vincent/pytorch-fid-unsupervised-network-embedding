@@ -291,7 +291,7 @@ def compute_statistics(data, model, batch_size=50, dims=2048,
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
    
-def compute_fid_SwAV(data1, data2, batch_size=1024, dims=1024, num_workers=1):
+def compute_fid_SwAV(data1, data2, batch_size=1024, dims=2048, num_workers=1):
     """Calculates the FID of two paths"""
 
     device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
