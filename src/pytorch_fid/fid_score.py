@@ -130,8 +130,10 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
     start_idx = 0
 
     for batch in tqdm(dataloader):
-        batch = batch.to(device)
-        model = model.to(device)
+        #batch = batch.to(device)
+        #model = model.to(device)
+        batch = batch.cuda()
+        model.cuda()
 
         with torch.no_grad():
 
