@@ -42,6 +42,7 @@ from PIL import Image
 from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
 from torchvision.models.feature_extraction import create_feature_extractor
+import pickle
 
 try:
     from tqdm import tqdm
@@ -291,7 +292,7 @@ def compute_statistics(data, model, batch_size=50, dims=2048,
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
    
-def compute_fid_SwAV(data1, data2, batch_size=1024, dims=2048, num_workers=1):
+def compute_fid_SwAV(data1, data2, model_path=None, batch_size=1024, dims=2048, num_workers=1):
     """Calculates the FID of two paths"""
 
     device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
@@ -299,9 +300,13 @@ def compute_fid_SwAV(data1, data2, batch_size=1024, dims=2048, num_workers=1):
     num_avail_cpus = len(os.sched_getaffinity(0))
     num_workers = min(num_avail_cpus, 8)
     
-    SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
-    model = create_feature_extractor(SwAV, 
-                                     return_nodes = {'layer4.2.bn3':'my_pred'})
+    if model_path is not None:
+      print(f'Loading model from {model_path}')
+      model = pickle.load(open(model_path, 'rb'))
+    else:
+       SwAV = torch.hub.load('facebookresearch/swav:main', 'resnet50')
+       model = create_feature_extractor(SwAV, 
+                                        return_nodes = {'layer4.2.bn3':'my_pred'})
 
     m1, s1 = compute_statistics(data1, model, batch_size,
                                         dims, device, num_workers)
