@@ -313,6 +313,7 @@ def compute_fid_SwAV(data1, data2, model_path=None, batch_size=1024, dims=2048, 
        model = create_feature_extractor(SwAV, 
                                         return_nodes = {'layer4.2.bn3':'my_pred'})
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f'Setting model to {device})
     model.to(device)
 
     m1, s1 = compute_statistics(data1, model, batch_size,
