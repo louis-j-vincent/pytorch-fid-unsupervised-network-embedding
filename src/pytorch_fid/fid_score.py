@@ -133,6 +133,7 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
         batch = batch.to(device)
 
         with torch.no_grad():
+            print(batch.shape)
             pred = model(batch)
             if 'my_pred' in pred.keys():
                pred = pred['my_pred']
@@ -287,6 +288,10 @@ def compute_statistics(data, model, batch_size=50, dims=2048,
     -- sigma : The covariance matrix of the activations of the pool_3 layer of
                the inception model.
     """
+    if data.shape[3]==1:
+        data = np.repeat(data, repeats=3, axis=3)
+    if data.shape[3]==3:
+        data = np.swapaxes(data,1,3)
     act = get_activations(data, model, batch_size, dims, device, num_workers)
     mu = np.mean(act, axis=0)
     sigma = np.cov(act, rowvar=False)
